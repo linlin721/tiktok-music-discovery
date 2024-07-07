@@ -1,37 +1,49 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import * as React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
+import MusicDiscoveryPage from './MusicDiscoveryPage';
+import CreationPage from './CreationPage';
+import MePage from './MePage';
+import FanClubPage from './FanClubPage';
+import FanClubOverviewPage from './FanClubOverviewPage';
+import PostDetailPage from './PostDetailPage';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+const Stack = createStackNavigator();
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
+const Layout = () => {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </ThemeProvider>
+    <Stack.Navigator>
+      <Stack.Screen
+        name="MusicDiscoveryPage"
+        component={MusicDiscoveryPage}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="CreationPage"
+        component={CreationPage}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="MePage"
+        component={MePage}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="FanClubPage"
+        component={FanClubPage}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="FanClubOverviewPage"
+        component={FanClubOverviewPage}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="PostDetailPage"
+        component={PostDetailPage}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
   );
-}
+};
+
+export default Layout;
