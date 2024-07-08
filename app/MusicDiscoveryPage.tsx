@@ -10,22 +10,31 @@ type Props = {
 
 const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [selectedStyle, setSelectedStyle] = useState<string>('Original');
+
+  const changeMusicStyle = (style: string) => {
+    console.log(`Changing music style to: ${style}`);
+    setSelectedStyle(style);
+    // Add logic to change music style here
+  };
 
   useEffect(() => {
+    const playSound = async () => {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: 'https://audiopipe.suno.ai/?item_id=a47acae7-d812-48cd-9d06-84e13f50b107' } // URL to the song
+      );
+      setSound(sound);
+      await sound.playAsync();
+    };
+
+    playSound();
+
     return sound
       ? () => {
           sound.unloadAsync();
         }
       : undefined;
-  }, [sound]);
-
-  const playSound = async () => {
-    const { sound } = await Audio.Sound.createAsync(
-      require('../assets/test.mp3') // Path to your local audio file
-    );
-    setSound(sound);
-    await sound.playAsync();
-  };
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -42,16 +51,19 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
       {/* Main video view */}
       <View style={styles.videoContainer}>
         <Image
-          source={{ uri: 'https://example.com/your-video-thumbnail.jpg' }} // Replace with your video thumbnail URL
+          source={require('../assets/test.gif')} // Replace with your video thumbnail URL
           style={styles.video}
         />
-      </View>
-
-      {/* Play audio button */}
-      <View style={styles.audioContainer}>
-        <TouchableOpacity onPress={playSound} style={styles.audioButton}>
-          <Ionicons name="play-circle-outline" size={64} color="white" />
-        </TouchableOpacity>
+        {/* Center GIF and Play button */}
+        <View style={styles.centerContent}>
+          <Image
+            source={{ uri: 'https://media.tenor.com/9kC8XJtFYdsAAAAC/frkst-records-music-label-art.gif' }} // URL to your GIF
+            style={styles.centerGif}
+          />
+          <TouchableOpacity onPress={() => {}} style={styles.playButton}>
+            <Ionicons name="play-circle-outline" size={64} color="white" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Right side buttons */}
@@ -72,38 +84,85 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.musicStyles}>
+        <TouchableOpacity
+          onPress={() => changeMusicStyle('Original')}
+          style={[
+            styles.styleButton,
+            selectedStyle === 'Original' && styles.selectedStyleButton
+          ]}
+        >
+          <Text style={styles.styleButtonText}>Original</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => changeMusicStyle('Pop')}
+          style={[
+            styles.styleButton,
+            selectedStyle === 'Pop' && styles.selectedStyleButton
+          ]}
+        >
+          <Text style={styles.styleButtonText}>Pop</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => changeMusicStyle('Rock')}
+          style={[
+            styles.styleButton,
+            selectedStyle === 'Rock' && styles.selectedStyleButton
+          ]}
+        >
+          <Text style={styles.styleButtonText}>Rock</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => changeMusicStyle('Jazz')}
+          style={[
+            styles.styleButton,
+            selectedStyle === 'Jazz' && styles.selectedStyleButton
+          ]}
+        >
+          <Text style={styles.styleButtonText}>Jazz</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => changeMusicStyle('Classical')}
+          style={[
+            styles.styleButton,
+            selectedStyle === 'Classical' && styles.selectedStyleButton
+          ]}
+        >
+          <Text style={styles.styleButtonText}>Classical</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Bottom navigation bar */}
       <View style={styles.bottomNavigation}>
         <TouchableOpacity onPress={() => navigation.navigate('HomePage')} style={styles.navItem}>
-          <FontAwesome5 name="home" size={24} color="white" />
+          <AntDesign name="home" size={24} color="gray" />
           <Text style={styles.bottomButtonText}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('ExplorePage')} style={styles.navItem}>
-          <FontAwesome5 name="search" size={24} color="white" />
-          <Text style={styles.bottomButtonText}>Explore</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('MusicDiscoveryPage')} style={styles.navItem}>
+          <MaterialIcons name="music-note" size={24} color="gray" />
+          <Text style={styles.bottomButtonText}>Music</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('AddVideoPage')} style={styles.navItem}>
-          <FontAwesome5 name="plus-square" size={24} color="white" />
-          <Text style={styles.bottomButtonText}>Add Video</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('CreationPage')} style={styles.navItem}>
+          <FontAwesome5 name="plus-square" size={24} color="gray" />
+          <Text style={styles.bottomButtonText}>Create</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('InboxPage')} style={styles.navItem}>
-          <Ionicons name="mail-outline" size={24} color="white" />
+          <Ionicons name="mail-outline" size={24} color="gray" />
           <Text style={styles.bottomButtonText}>Inbox</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('MePage')} style={styles.navItem}>
-          <Ionicons name="person-outline" size={24} color="white" />
+          <Ionicons name="person-outline" size={24} color="gray" />
           <Text style={styles.bottomButtonText}>Me</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'black',
-    paddingBottom: 60,
+    paddingBottom: 100,
   },
   topNavigation: {
     flexDirection: 'row',
@@ -128,11 +187,11 @@ const styles = StyleSheet.create({
   },
   video: {
     width: '100%',
-    height: '100%',
+    height: '70%',
   },
   audioContainer: {
     position: 'absolute',
-    bottom: 180,
+    bottom: 250,
     right: 10,
     alignItems: 'center',
   },
@@ -142,7 +201,7 @@ const styles = StyleSheet.create({
   rightSideButtons: {
     position: 'absolute',
     right: 10,
-    bottom: 110,
+    bottom: 180,
     alignItems: 'center',
   },
   iconButton: {
@@ -153,6 +212,27 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 12,
   },
+  musicStyles: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 10,
+    position: 'absolute',
+    bottom: 60,
+    width: '100%',
+  },
+  styleButton: {
+    backgroundColor: '#1e1e1e',
+    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+  },
+  selectedStyleButton: {
+    backgroundColor: '#555',
+  },
+  styleButtonText: {
+    color: 'white',
+    fontSize: 14,
+  },
   bottomNavigation: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -161,7 +241,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#333',
     position: 'absolute',
-    bottom: 30,
+    bottom: 0,
     width: '100%',
   },
   navItem: {
@@ -172,5 +252,4 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
 });
-
 export default MusicDiscoveryPage;
