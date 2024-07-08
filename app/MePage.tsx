@@ -34,12 +34,12 @@ const MePage: React.FC<Props> = ({ navigation }) => {
         <Text style={styles.handle}>@jacob_w</Text>
         <View style={styles.badges}>
           <View style={styles.badgeContainer}>
-            <Image source={require('../assets/jay-chou.jpg')} style={styles.badge} />
-            <Text style={styles.badgeLevel}>Level 1</Text>
+            <Image source={require('../assets/ariana-grande.jpg')} style={styles.badge} />
+            <Text style={styles.badgeLevel}>Level 5</Text>
           </View>
           <View style={styles.badgeContainer}>
-            <Image source={require('../assets/jay-chou.jpg')} style={styles.badge} />
-            <Text style={styles.badgeLevel}>Level 2</Text>
+            <Image source={require('../assets/adele.jpg')} style={styles.badge} />
+            <Text style={styles.badgeLevel}>Level 3</Text>
           </View>
           <View style={styles.badgeContainer}>
             <Image source={require('../assets/jay-chou.jpg')} style={styles.badge} />
