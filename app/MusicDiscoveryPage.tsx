@@ -9,32 +9,71 @@ type Props = {
 };
 
 const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
+  // Create a mapping between music style and URL
+  const musicStyles = {
+    "Original": 'https://cdn1.suno.ai/868dcfb6-c622-4b50-a9bb-8b35a7f1b443.mp3',
+    "Pop": 'https://cdn1.suno.ai/868dcfb6-c622-4b50-a9bb-8b35a7f1b443.mp3',
+    "Rock": 'https://cdn1.suno.ai/a47acae7-d812-48cd-9d06-84e13f50b107.mp3',
+    "Jazz": 'https://cdn1.suno.ai/370affac-3c8f-4279-9730-9104a182de40.mp3',
+    "Classical": 'https://cdn1.suno.ai/f24d1831-46b7-405d-8ce9-ad5553b3399b.mp3',
+  };
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [selectedStyle, setSelectedStyle] = useState<string>('Original');
+  const [audioUrl, setAudioUrl] = useState<string>(musicStyles["Original"]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const changeMusicStyle = (style: string) => {
     console.log(`Changing music style to: ${style}`);
     setSelectedStyle(style);
+    setAudioUrl(musicStyles[style]);
     // Add logic to change music style here
   };
 
-  useEffect(() => {
-    const playSound = async () => {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: 'https://audiopipe.suno.ai/?item_id=a47acae7-d812-48cd-9d06-84e13f50b107' } // URL to the song
+  const playSound = async () => {
+    if (isPlaying && sound) {
+      await sound.stopAsync();
+      setIsPlaying(false);
+    } else {
+      setIsLoading(true);
+      if (sound) {
+        await sound.unloadAsync();
+        setSound(null);
+      }
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: audioUrl }
       );
-      setSound(sound);
-      await sound.playAsync();
+      setSound(newSound);
+      await newSound.playAsync();
+      setIsPlaying(true);
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadSound = async () => {
+      setIsLoading(true);
+      if (sound) {
+        await sound.unloadAsync();
+        setSound(null);
+      }
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: audioUrl }
+      );
+      setSound(newSound);
+      setIsLoading(false);
     };
 
-    playSound();
+    if (audioUrl) {
+      loadSound();
+    }
 
-    return sound
-      ? () => {
-          sound.unloadAsync();
-        }
-      : undefined;
-  }, []);
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, [audioUrl]);
 
   return (
     <View style={styles.container}>
@@ -60,7 +99,7 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
             source={{ uri: 'https://media.tenor.com/9kC8XJtFYdsAAAAC/frkst-records-music-label-art.gif' }} // URL to your GIF
             style={styles.centerGif}
           />
-          <TouchableOpacity onPress={() => {}} style={styles.playButton}>
+          <TouchableOpacity onPress={playSound} style={styles.playButton}>
             <Ionicons name="play-circle-outline" size={64} color="white" />
           </TouchableOpacity>
         </View>

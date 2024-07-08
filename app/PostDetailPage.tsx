@@ -112,7 +112,7 @@ export default function PostDetailPage({ navigation }) {
             <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.input}
-                    placeholder="Tweet your reply"
+                    placeholder="Post your comment"
                     value={inputText}
                     onChangeText={setInputText}
                 />
