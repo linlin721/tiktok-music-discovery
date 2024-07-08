@@ -8,10 +8,8 @@ type Props = {
 };
 
 const videos = [
-  { id: '1', thumbnail: require('../assets/jay-chou.jpg') },
-  { id: '2', thumbnail: require('../assets/jay-chou.jpg') },
-  { id: '3', thumbnail: require('../assets/jay-chou.jpg') },
-  { id: '4', thumbnail: require('../assets/jay-chou.jpg') },
+  { id: '1', thumbnail: require('../assets/v1.jpg') },
+  { id: '2', thumbnail: require('../assets/v2.jpg') },
   // Add more video thumbnails as needed
 ];
 
@@ -30,7 +28,7 @@ const MePage: React.FC<Props> = ({ navigation }) => {
       
       <View style={styles.profileContainer}>
         <Text style={styles.username}>Jacob West</Text>
-        <Image source={require('../assets/jay-chou.jpg')} style={styles.avatar} />
+        <Image source={require('../assets/avatar3.png')} style={styles.avatar} />
         <Text style={styles.handle}>@jacob_w</Text>
         <View style={styles.badges}>
           <View style={styles.badgeContainer}>

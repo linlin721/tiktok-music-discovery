@@ -11,12 +11,12 @@ const posts = [
   {
     id: '1',
     name: 'Jay Chou',
-    time: '5 mins ago',
+    time: '1 mins ago',
     content: 'Hi everyone! I am excited to announce that my new album is coming next month! #JayChouNewAlbum',
     avatar: require('../assets/jay-chou.jpg'),
-    likes: '1 249',
-    comments: '1 906',
-    shares: '7 461',
+    likes: '15',
+    comments: '2',
+    shares: '5',
   },
   // Add more posts as needed
 ];
