@@ -1,13 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { AntDesign, Entypo, Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { NavigationProp } from '@react-navigation/native';
+import { Audio } from 'expo-av';
 
 type Props = {
   navigation: NavigationProp<any, any>;
 };
 
 const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+
+  useEffect(() => {
+    return sound
+      ? () => {
+          sound.unloadAsync();
+        }
+      : undefined;
+  }, [sound]);
+
+  const playSound = async () => {
+    const { sound } = await Audio.Sound.createAsync(
+      require('../assets/test.mp3') // Path to your local audio file
+    );
+    setSound(sound);
+    await sound.playAsync();
+  };
+
   return (
     <View style={styles.container}>
       {/* Top navigation buttons */}
@@ -26,6 +45,13 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
           source={{ uri: 'https://example.com/your-video-thumbnail.jpg' }} // Replace with your video thumbnail URL
           style={styles.video}
         />
+      </View>
+
+      {/* Play audio button */}
+      <View style={styles.audioContainer}>
+        <TouchableOpacity onPress={playSound} style={styles.audioButton}>
+          <Ionicons name="play-circle-outline" size={64} color="white" />
+        </TouchableOpacity>
       </View>
 
       {/* Right side buttons */}
@@ -49,16 +75,16 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
       {/* Bottom navigation bar */}
       <View style={styles.bottomNavigation}>
         <TouchableOpacity onPress={() => navigation.navigate('HomePage')} style={styles.navItem}>
-          <AntDesign name="home" size={24} color="white" />
+          <FontAwesome5 name="home" size={24} color="white" />
           <Text style={styles.bottomButtonText}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('MusicDiscoveryPage')} style={styles.navItem}>
-          <MaterialIcons name="music-note" size={24} color="white" />
-          <Text style={styles.bottomButtonText}>Music</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('ExplorePage')} style={styles.navItem}>
+          <FontAwesome5 name="search" size={24} color="white" />
+          <Text style={styles.bottomButtonText}>Explore</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('CreationPage')} style={styles.navItem}>
+        <TouchableOpacity onPress={() => navigation.navigate('AddVideoPage')} style={styles.navItem}>
           <FontAwesome5 name="plus-square" size={24} color="white" />
-          <Text style={styles.bottomButtonText}>Create</Text>
+          <Text style={styles.bottomButtonText}>Add Video</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('InboxPage')} style={styles.navItem}>
           <Ionicons name="mail-outline" size={24} color="white" />
@@ -77,13 +103,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'black',
-    paddingBottom: 60, // Increased padding to make space for the navigation bar
+    paddingBottom: 60,
   },
   topNavigation: {
     flexDirection: 'row',
     justifyContent: 'center',
     paddingVertical: 10,
-    marginTop: 55, // Further increased margin to move the buttons lower
+    marginTop: 55,
   },
   topButton: {
     color: 'white',
@@ -104,10 +130,19 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  audioContainer: {
+    position: 'absolute',
+    bottom: 180,
+    right: 10,
+    alignItems: 'center',
+  },
+  audioButton: {
+    alignItems: 'center',
+  },
   rightSideButtons: {
     position: 'absolute',
     right: 10,
-    bottom: 110, // Adjusted to move the buttons higher
+    bottom: 110,
     alignItems: 'center',
   },
   iconButton: {
@@ -126,7 +161,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#333',
     position: 'absolute',
-    bottom: 30, // Adjusted to move the navigation bar higher
+    bottom: 30,
     width: '100%',
   },
   navItem: {
