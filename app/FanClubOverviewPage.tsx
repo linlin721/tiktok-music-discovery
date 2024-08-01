@@ -54,6 +54,13 @@ const FanClubOverviewPage: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.navigate('FanClubPage')}>
+          <AntDesign name="left" size={16} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.topHeaderName}>Fan Club</Text>
+      </View>
+
       {/* Avatar and Name at the top */}
       <View style={styles.topContainer}>
         <Image source={require('../assets/jay-chou.jpg')} style={styles.topAvatar} />
@@ -100,9 +107,21 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     paddingBottom: 60, // Padding for the navigation bar
   },
+  header: {
+    padding: 20,
+    marginTop: 50,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  topHeaderName: {
+    fontSize: 18,
+    position: 'absolute',
+    left: '46%',
+  },
   topContainer: {
     alignItems: 'center',
-    marginVertical: 60, // Decrease this value to move the avatar lower
+    // marginVertical: 60, // Decrease this value to move the avatar lower
   },
   topAvatar: {
     width: 80,
@@ -115,12 +134,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   postContainer: {
-    marginVertical: -200,
+    marginTop: -160,
     flexDirection: 'row',
     marginBottom: 20,
     marginHorizontal: 20, // Decrease width
     paddingVertical: 20, // Increase height
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#DCD6E4',
     borderRadius: 10,
     padding: 10,
   },

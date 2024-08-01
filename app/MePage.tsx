@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { AntDesign, Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { NavigationProp } from '@react-navigation/native';
+import axios from 'axios';
 
 type Props = {
   navigation: NavigationProp<any, any>;
@@ -14,8 +15,44 @@ const videos = [
 ];
 
 const MePage: React.FC<Props> = ({ navigation }) => {
+  const [selectedTab, setSelectedTab] = useState<'videos' | 'favorites'>('videos');
+  const [favBGM, setFavBGM] = useState([]);
+  const [hasFavorites, setHasFavorites] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (selectedTab === 'favorites') {
+      const fetchFavBGM = async () => {
+        try {
+          const userIdRes = await axios.get('http://localhost:5002/user/dummy');
+          const userId = userIdRes.data.userId;
+
+          if (!userId) {
+            Alert.alert('Error', 'User ID not found');
+            return;
+          }
+          const response = await axios.get(`http://localhost:5002/music/favorites/${userId}`);
+          setFavBGM(response.data);
+          setHasFavorites(response.data.length > 0);
+        } catch (error) {
+          console.error('Error fetching favorite BGMs:', error);
+          Alert.alert('Error', 'Failed to fetch favorite BGMs');
+          setHasFavorites(false);
+        }
+      };
+      fetchFavBGM();
+    }
+  }, [selectedTab]);
+
   const renderVideoItem = ({ item }: { item: any }) => (
     <Image source={item.thumbnail} style={styles.videoThumbnail} />
+  );
+
+  const renderBGMItem = ({ item }: { item: any }) => (
+    <View style={styles.bgmContainer}>
+      <Text style={styles.bgmTitle}>{item.title}</Text>
+      <Text style={styles.bgmArtist}>{item.artist}</Text>
+      <Text style={styles.bgmStyle}>{item.style}</Text>
+    </View>
   );
 
   return (
@@ -25,7 +62,7 @@ const MePage: React.FC<Props> = ({ navigation }) => {
           <AntDesign name="ellipsis1" size={24} color="black" />
         </TouchableOpacity>
       </View>
-      
+
       <View style={styles.profileContainer}>
         <Text style={styles.username}>Jacob West</Text>
         <Image source={require('../assets/avatar3.png')} style={styles.avatar} />
@@ -65,23 +102,38 @@ const MePage: React.FC<Props> = ({ navigation }) => {
       </View>
 
       <View style={styles.tabs}>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="grid-outline" size={24} color="black" />
+        <TouchableOpacity style={styles.tabItem} onPress={() => setSelectedTab('videos')}>
+          <Ionicons name="grid-outline" size={24} color={selectedTab === 'videos' ? 'black' : 'gray'} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="heart-outline" size={24} color="black" />
+        <TouchableOpacity style={styles.tabItem} onPress={() => setSelectedTab('favorites')}>
+          <Ionicons name="heart-outline" size={24} color={selectedTab === 'favorites' ? 'black' : 'gray'} />
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={videos}
-        renderItem={renderVideoItem}
-        keyExtractor={(item) => item.id}
-        numColumns={3}
-        style={styles.videoList}
-      />
+      {selectedTab === 'videos' ? (
+        <FlatList
+          data={videos}
+          renderItem={renderVideoItem}
+          keyExtractor={(item) => item.id}
+          numColumns={3}
+          key={'videos'}
+          style={styles.videoList}
+        />
+      ) : hasFavorites ? (
+        <FlatList
+          data={favBGM}
+          renderItem={renderBGMItem}
+          keyExtractor={(item) => item._id}
+          numColumns={1}
+          key={'favorites'}
+          style={styles.bgmList}
+        />
+      ) : (
+        <View style={styles.noFavoritesContainer}>
+          <Text style={styles.noFavoritesText}>No Favorite BGM</Text>
+        </View>
+      )}
 
-      {/* Bottom navigation bar */}
       <View style={styles.bottomNavigation}>
         <TouchableOpacity onPress={() => navigation.navigate('HomePage')} style={styles.navItem}>
           <AntDesign name="home" size={24} color="gray" />
@@ -194,12 +246,41 @@ const styles = StyleSheet.create({
   tabItem: {
     alignItems: 'center',
   },
+  bgmList: {
+    flex: 1,
+  },
+  bgmContainer: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  bgmTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  bgmArtist: {
+    fontSize: 14,
+    color: 'gray',
+  },
+  bgmStyle: {
+    fontSize: 12,
+    color: 'gray',
+  },
   videoList: {
     flex: 1,
   },
   videoThumbnail: {
     width: '33%',
     aspectRatio: 1,
+  },
+  noFavoritesContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noFavoritesText: {
+    fontSize: 18,
+    color: 'gray',
   },
   bottomNavigation: {
     flexDirection: 'row',

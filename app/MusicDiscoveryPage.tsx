@@ -1,83 +1,164 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { AntDesign, Entypo, Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 import { NavigationProp } from '@react-navigation/native';
 import { Audio } from 'expo-av';
+import axios from 'axios';
 
 type Props = {
   navigation: NavigationProp<any, any>;
 };
 
 const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
-  // Create a mapping between music style and URL
-  const musicStyles = {
-    "Original": 'https://cdn1.suno.ai/868dcfb6-c622-4b50-a9bb-8b35a7f1b443.mp3',
-    "Pop": 'https://cdn1.suno.ai/868dcfb6-c622-4b50-a9bb-8b35a7f1b443.mp3',
-    "Rock": 'https://cdn1.suno.ai/a47acae7-d812-48cd-9d06-84e13f50b107.mp3',
-    "Jazz": 'https://cdn1.suno.ai/370affac-3c8f-4279-9730-9104a182de40.mp3',
-    "Classical": 'https://cdn1.suno.ai/f24d1831-46b7-405d-8ce9-ad5553b3399b.mp3',
+  const musicStyles: { [key: string]: string } = {
+    "Original": 'Original',
+    "Pop": 'Pop',
+    "Rock": 'Rock',
+    "Jazz": 'Jazz',
+    "Classical": 'Classical',
   };
+
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [selectedStyle, setSelectedStyle] = useState<string>('Original');
-  const [audioUrl, setAudioUrl] = useState<string>(musicStyles["Original"]);
+  const [audioUrl, setAudioUrl] = useState<string>('');
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const changeMusicStyle = (style: string) => {
-    console.log(`Changing music style to: ${style}`);
-    setSelectedStyle(style);
-    setAudioUrl(musicStyles[style]);
-    // Add logic to change music style here
-  };
-
-  const playSound = async () => {
-    if (isPlaying && sound) {
-      await sound.stopAsync();
-      setIsPlaying(false);
-    } else {
-      setIsLoading(true);
-      if (sound) {
-        await sound.unloadAsync();
-        setSound(null);
-      }
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: audioUrl }
-      );
-      setSound(newSound);
-      await newSound.playAsync();
-      setIsPlaying(true);
-      setIsLoading(false);
-    }
-  };
+  const [userId, setUserId] = useState<string | null>(null);
+  const [songInfo, setSongInfo] = useState<{ title: string, artist: string, style: string } | null>(null);
 
   useEffect(() => {
-    const loadSound = async () => {
-      setIsLoading(true);
+    const fetchUserId = async () => {
+      try {
+        const res = await axios.get('http://localhost:5002/user/dummy');
+        const { userId } = res.data;
+        setUserId(userId);
+      } catch (error) {
+        console.error('Error fetching user ID:', error);
+      }
+    };
+    fetchUserId();
+  }, []);
+
+  useEffect(() => {
+    const fetchSong = async () => {
+      try {
+        console.log('Fetching song...');
+        const payload = {
+          prompt: "Create a calm and soothing background music",
+          tags: selectedStyle,
+          title: "Calm Melody",
+          artist: "Justin Bieber"
+        };
+        console.log('Payload:', payload);
+        const res = await axios.post('http://localhost:5003/generate_bgm', payload);
+        console.log('Response:', res.data);
+        const { title, artist, style, audio_url } = res.data;
+        setAudioUrl(audio_url);
+        setSongInfo({ title, artist, style });
+      } catch (error) {
+        console.error('Error fetching song:', error);
+      }
+    };
+    fetchSong();
+  }, [selectedStyle]);
+  
+
+  // const playSound = async () => {
+  //   if (isPlaying && sound) {
+  //     await sound.stopAsync();
+  //     setIsPlaying(false);
+  //   } else {
+  //     setIsLoading(true);
+  //     if (sound) {
+  //       await sound.unloadAsync();
+  //       setSound(null);
+  //     }
+  //     try {
+  //       const { sound: newSound } = await Audio.Sound.createAsync({ uri: audioUrl });
+  //       setSound(newSound);
+  //       await newSound.playAsync();
+  //       setIsPlaying(true);
+  //     } catch (error) {
+  //       console.error('Error playing sound:', error);
+  //     }
+  //     setIsLoading(false);
+  //   }
+  // };  
+  
+  const playSound = async () => {
+    try {
+      console.log('Loading Sound');
       if (sound) {
         await sound.unloadAsync();
         setSound(null);
       }
       const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: audioUrl }
+        { uri: audioUrl },
+        { shouldPlay: true }
       );
       setSound(newSound);
-      setIsLoading(false);
-    };
 
-    if (audioUrl) {
-      loadSound();
+      console.log('Playing Sound');
+      await newSound.playAsync();
+    } catch (error) {
+      console.error('Error handling sound object:', error);
     }
+  };
 
-    return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, [audioUrl]);
+  // Cleanup sound object
+  useEffect(() => {
+    return sound
+      ? () => {
+          console.log('Unloading Sound');
+          sound.unloadAsync();
+        }
+      : undefined;
+  }, [sound]);
+
+  const addFavoriteBGM = async (musicId: string) => {
+    if (!userId) {
+      Alert.alert('Error:', 'User ID not found!');
+      return;
+    }
+    try {
+      await axios.post('http://localhost:5002/music/favorites', {
+        userId,
+        musicId
+      });
+      Alert.alert('Success', 'BGM added to favorites');
+    } catch (error) {
+      console.error('Error adding favorite BGM:', error);
+      Alert.alert('Error', 'Failed to add BGM to favorites');
+    }
+  };
+
+  const generateAndSaveBGM = async () => {
+    try {
+      const payload = {
+        prompt: "Create a calm and soothing background music",
+        tags: selectedStyle,
+        title: "Calm Melody",
+        artist: "any"
+      };
+
+      const response = await axios.post('http://localhost:5003/generate_bgm', payload);
+      const { title, artist, style, audio_url } = response.data;
+
+      const musicResponse = await axios.post('http://localhost:5002/music', { title, artist, style, audio_url });
+      const musicId = musicResponse.data._id;
+
+      await addFavoriteBGM(musicId);
+
+      Alert.alert('Success', 'BGM generated and saved');
+    } catch (error) {
+      console.error('Error generating or saving BGM:', error);
+      Alert.alert('Error', 'Failed to generate or save BGM');
+    }
+  };
 
   return (
     <View style={styles.container}>
-      {/* Top navigation buttons */}
       <View style={styles.topNavigation}>
         <TouchableOpacity onPress={() => navigation.navigate('FanClubPage')}>
           <Text style={styles.topButton}>Fan Club</Text>
@@ -87,25 +168,23 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Main video view */}
       <View style={styles.videoContainer}>
-        <Image
-          source={require('../assets/test.gif')} // Replace with your video thumbnail URL
-          style={styles.video}
-        />
-        {/* Center GIF and Play button */}
+        <Image source={require('../assets/test.gif')} style={styles.video} />
         <View style={styles.centerContent}>
-          <Image
-            source={{ uri: 'https://media.tenor.com/9kC8XJtFYdsAAAAC/frkst-records-music-label-art.gif' }} // URL to your GIF
-            style={styles.centerGif}
-          />
+          <Image source={{ uri: 'https://media.tenor.com/9kC8XJtFYdsAAAAC/frkst-records-music-label-art.gif' }} style={styles.centerGif} />
           <TouchableOpacity onPress={playSound} style={styles.playButton}>
             <Ionicons name="play-circle-outline" size={64} color="white" />
           </TouchableOpacity>
         </View>
+        {songInfo && (
+          <View style={styles.songInfo}>
+            <Text style={styles.songTitle}>{songInfo.title}</Text>
+            <Text style={styles.songArtist}>{songInfo.artist}</Text>
+            <Text style={styles.songStyle}>{songInfo.style}</Text>
+          </View>
+        )}
       </View>
 
-      {/* Right side buttons */}
       <View style={styles.rightSideButtons}>
         <TouchableOpacity style={styles.iconButton}>
           <AntDesign name="heart" size={24} color="white" />
@@ -118,60 +197,23 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
         <TouchableOpacity style={styles.iconButton}>
           <AntDesign name="sharealt" size={24} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton}>
-          <Entypo name="dots-three-vertical" size={24} color="white" />
+        <TouchableOpacity style={styles.iconButton} onPress={generateAndSaveBGM}>
+          <SimpleLineIcons name="magic-wand" size={24} color="white" />
         </TouchableOpacity>
       </View>
 
       <View style={styles.musicStyles}>
-        <TouchableOpacity
-          onPress={() => changeMusicStyle('Original')}
-          style={[
-            styles.styleButton,
-            selectedStyle === 'Original' && styles.selectedStyleButton
-          ]}
-        >
-          <Text style={styles.styleButtonText}>Original</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => changeMusicStyle('Pop')}
-          style={[
-            styles.styleButton,
-            selectedStyle === 'Pop' && styles.selectedStyleButton
-          ]}
-        >
-          <Text style={styles.styleButtonText}>Pop</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => changeMusicStyle('Rock')}
-          style={[
-            styles.styleButton,
-            selectedStyle === 'Rock' && styles.selectedStyleButton
-          ]}
-        >
-          <Text style={styles.styleButtonText}>Rock</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => changeMusicStyle('Jazz')}
-          style={[
-            styles.styleButton,
-            selectedStyle === 'Jazz' && styles.selectedStyleButton
-          ]}
-        >
-          <Text style={styles.styleButtonText}>Jazz</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => changeMusicStyle('Classical')}
-          style={[
-            styles.styleButton,
-            selectedStyle === 'Classical' && styles.selectedStyleButton
-          ]}
-        >
-          <Text style={styles.styleButtonText}>Classical</Text>
-        </TouchableOpacity>
+        {Object.keys(musicStyles).map(style => (
+          <TouchableOpacity
+            key={style}
+            onPress={() => setSelectedStyle(style)}
+            style={[styles.styleButton, selectedStyle === style && styles.selectedStyleButton]}
+          >
+            <Text style={styles.styleButtonText}>{style}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      {/* Bottom navigation bar */}
       <View style={styles.bottomNavigation}>
         <TouchableOpacity onPress={() => navigation.navigate('HomePage')} style={styles.navItem}>
           <AntDesign name="home" size={24} color="gray" />
@@ -197,6 +239,7 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -227,6 +270,38 @@ const styles = StyleSheet.create({
   video: {
     width: '100%',
     height: '70%',
+  },
+  centerContent: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  centerGif: {
+    width: 100,
+    height: 100,
+  },
+  playButton: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  songInfo: {
+    position: 'absolute',
+    bottom: 20,
+    alignItems: 'center',
+  },
+  songTitle: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  songArtist: {
+    color: 'white',
+    fontSize: 16,
+  },
+  songStyle: {
+    color: 'white',
+    fontSize: 14,
   },
   audioContainer: {
     position: 'absolute',
