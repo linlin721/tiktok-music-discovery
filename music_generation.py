@@ -80,7 +80,7 @@ CORS(app)
 logging.basicConfig(level=logging.DEBUG)
 
 base_url = 'https://api.aimlapi.com'
-api_key = '55c1a12e86cc4a87b56be196d90e9487'  # the API key
+api_key = '56867b7be6b34d26adc6935bf7510478'  # the API key
 
 def custom_generate_audio(payload):
     try:

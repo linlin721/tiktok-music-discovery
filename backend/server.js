@@ -3,13 +3,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const path = require('path'); // Import the path module
 const { stringify } = require('querystring');
 const app = express();
 
 app.use(bodyParser.json());
 app.use(cors());
-app.use('/assets', express.static(path.join(__dirname, '../assets')));
 
 // Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/tiktokCommunity', { useNewUrlParser: true, useUnifiedTopology: true })

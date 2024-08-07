@@ -47,11 +47,15 @@ const MePage: React.FC<Props> = ({ navigation }) => {
     <Image source={item.thumbnail} style={styles.videoThumbnail} />
   );
 
+
   const renderBGMItem = ({ item }: { item: any }) => (
     <View style={styles.bgmContainer}>
-      <Text style={styles.bgmTitle}>{item.title}</Text>
-      <Text style={styles.bgmArtist}>{item.artist}</Text>
-      <Text style={styles.bgmStyle}>{item.style}</Text>
+      <View style={styles.bgmTextContainer}>
+        <Text style={styles.bgmTitle}>{item.title}</Text>
+        <Text style={styles.bgmArtist}>{item.artist}</Text>
+        <Text style={styles.bgmStyle}>{item.style}</Text>
+      </View>
+      <AntDesign name="playcircleo" size={24} color="black" />
     </View>
   );
 
@@ -250,9 +254,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bgmContainer: {
+    // padding: 10,
+    // borderBottomWidth: 1,
+    // borderBottomColor: '#ddd',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 10,
+    backgroundColor: '#f0f0f0',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+  },
+  bgmTextContainer: {
+    flex: 1,
+    paddingRight: 10,
   },
   bgmTitle: {
     fontSize: 16,

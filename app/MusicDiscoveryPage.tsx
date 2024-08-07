@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { AntDesign, Entypo, Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
@@ -26,7 +26,13 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [songInfo, setSongInfo] = useState<{ title: string, artist: string, style: string } | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
+  const LoadingOverlay = ({ message }:{message:any}) => (
+    <View style={styles.loadingOverlay}>
+      <Text style={styles.loadingText}>{message}</Text>
+    </View>
+  );
   useEffect(() => {
     const fetchUserId = async () => {
       try {
@@ -42,6 +48,8 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
 
   useEffect(() => {
     const fetchSong = async () => {
+      setIsLoading(true); // Start loading
+  
       try {
         console.log('Fetching song...');
         const payload = {
@@ -58,63 +66,81 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
         setSongInfo({ title, artist, style });
       } catch (error) {
         console.error('Error fetching song:', error);
+      } finally {
+        setIsLoading(false); // Stop loading
       }
     };
     fetchSong();
   }, [selectedStyle]);
   
-
-  // const playSound = async () => {
-  //   if (isPlaying && sound) {
-  //     await sound.stopAsync();
-  //     setIsPlaying(false);
-  //   } else {
-  //     setIsLoading(true);
-  //     if (sound) {
-  //       await sound.unloadAsync();
-  //       setSound(null);
-  //     }
-  //     try {
-  //       const { sound: newSound } = await Audio.Sound.createAsync({ uri: audioUrl });
-  //       setSound(newSound);
-  //       await newSound.playAsync();
-  //       setIsPlaying(true);
-  //     } catch (error) {
-  //       console.error('Error playing sound:', error);
-  //     }
-  //     setIsLoading(false);
-  //   }
-  // };  
-  
-  const playSound = async () => {
-    try {
-      console.log('Loading Sound');
-      if (sound) {
-        await sound.unloadAsync();
-        setSound(null);
-      }
+  useEffect(() => {
+    return sound
+      ? () => {
+          sound.unloadAsync(); // Unload sound when component unmounts
+        }
+      : undefined;
+  }, [sound]);
+  async function playSound() {
+    if (sound) {
+      await sound.playAsync();
+      setIsPlaying(true);
+    } else {
       const { sound: newSound } = await Audio.Sound.createAsync(
         { uri: audioUrl },
         { shouldPlay: true }
       );
       setSound(newSound);
-
-      console.log('Playing Sound');
+      setIsPlaying(true);
       await newSound.playAsync();
-    } catch (error) {
-      console.error('Error handling sound object:', error);
+    }
+  }
+
+  async function stopSound() {
+    if (sound) {
+      await sound.stopAsync();
+      setIsPlaying(false);
+    }
+  }
+
+  const handlePress = async () => {
+    if (isPlaying) {
+      await stopSound();
+    } else {
+      await playSound();
     }
   };
+  // const playSound = async () => {
+  //   try {
+  //     console.log('Loading Sound');
+  //     if (sound) {
+  //       // await sound.unloadAsync();
+  //       console.log('Stopping Sound');
+  //       await sound.stopAsync();
+  //       await sound.unloadAsync();
+  //       setSound(null);
+  //     }
+  //     const { sound: newSound } = await Audio.Sound.createAsync(
+  //       { uri: audioUrl },
+  //       { shouldPlay: true }
+  //     );
+  //     setSound(newSound);
 
-  // Cleanup sound object
-  useEffect(() => {
-    return sound
-      ? () => {
-          console.log('Unloading Sound');
-          sound.unloadAsync();
-        }
-      : undefined;
-  }, [sound]);
+  //     console.log('Playing Sound');
+  //     await newSound.playAsync();
+  //   } catch (error) {
+  //     console.error('Error handling sound object:', error);
+  //   }
+  // };
+
+  // // Cleanup sound object
+  // useEffect(() => {
+  //   return () => {
+  //     if (sound) {
+  //       console.log('Unloading Sound');
+  //       sound.unloadAsync();
+  //     }
+  //   };
+  // }, [sound]);
 
   const addFavoriteBGM = async (musicId: string) => {
     if (!userId) {
@@ -134,6 +160,8 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
   };
 
   const generateAndSaveBGM = async () => {
+    setIsGenerating(true); // Start generating
+
     try {
       const payload = {
         prompt: "Create a calm and soothing background music",
@@ -154,6 +182,8 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
     } catch (error) {
       console.error('Error generating or saving BGM:', error);
       Alert.alert('Error', 'Failed to generate or save BGM');
+    } finally {
+      setIsGenerating(false); // Stop generating
     }
   };
 
@@ -172,7 +202,7 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
         <Image source={require('../assets/test.gif')} style={styles.video} />
         <View style={styles.centerContent}>
           <Image source={{ uri: 'https://media.tenor.com/9kC8XJtFYdsAAAAC/frkst-records-music-label-art.gif' }} style={styles.centerGif} />
-          <TouchableOpacity onPress={playSound} style={styles.playButton}>
+          <TouchableOpacity onPress={handlePress} style={styles.playButton}>
             <Ionicons name="play-circle-outline" size={64} color="white" />
           </TouchableOpacity>
         </View>
@@ -236,6 +266,9 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.bottomButtonText}>Me</Text>
         </TouchableOpacity>
       </View>
+
+      {isLoading && <LoadingOverlay message="Fetching song..." />}
+      {isGenerating && <LoadingOverlay message="Generating and saving BGM..." />}
     </View>
   );
 };
@@ -284,6 +317,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
+    opacity: 0, // make the button invisible but still clickable
   },
   songInfo: {
     position: 'absolute',
@@ -364,6 +398,20 @@ const styles = StyleSheet.create({
   bottomButtonText: {
     color: 'white',
     fontSize: 10,
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  loadingText: {
+    color: 'white',
+    fontSize: 18,
   },
 });
 export default MusicDiscoveryPage;

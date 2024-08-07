@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, FlatList, Image, TouchableOpacity } from 'react-native';
 import { AntDesign, MaterialIcons, FontAwesome5, Ionicons, Feather } from '@expo/vector-icons';
 import axios from 'axios';
-// import LinearGradient from 'react-native-linear-gradient';
-// import { LinearGradient } from 'expo-linear-gradient';
 
 
 interface User {
@@ -210,13 +208,6 @@ export default function PostDetailPage({ navigation, route }: { navigation: any,
                 <Image source={require('../assets/jay-chou.jpg')} style={styles.topAvatar} />
             </View>
 
-            {/* <LinearGradient colors={['#FF5733', '#FFBD33']} style={styles.header} >
-                <TouchableOpacity onPress={() => navigation.navigate('FanClubOverviewPage')}>
-                    <AntDesign name="left" size={16} color="black" />
-                </TouchableOpacity>
-                <Image source={require('../assets/jay-chou.jpg')} style={styles.topAvatar} />
-            </LinearGradient> */}
-
             <View style={styles.postContainer}>
                 <View style={styles.postHeader}>
                     <View style={styles.avatarContainer}>
@@ -338,12 +329,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
-    // linearGradient: {
-    //     justifyContent: 'center', 
-    //     alignItems: 'center', 
-    //     padding: 20, 
-    //     borderRadius: 10
-    // },
     topAvatar: {
         width: 40,
         height: 40,
