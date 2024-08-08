@@ -10,11 +10,11 @@ CORS(app)
 logging.basicConfig(level=logging.DEBUG)
 
 base_url = 'https://api.aimlapi.com'
-api_key = 'f0549be2e5a24c73971eca488103b7c3'  # the API key
+api_key = ''  # the API key
 
 def custom_generate_audio(payload):
     try:
-        url = f"{base_url}/generate"
+        url = f"{base_url}/generate/custom-mode"
         headers = {
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {api_key}'
@@ -52,9 +52,9 @@ def generate_bgm():
         data = request.json
         logging.debug(f'Received data: {data}')  # debugging
         payload = {
-            "prompt": data.get('prompt', 'Create a calm and soothing background music'),
-            "tags": data.get('tags', 'ambient'),
-            "title": data.get('title', 'Calm Melody'),
+            "prompt": data.get('prompt', ''),
+            "tags": data.get('tags', ''),
+            "title": data.get('title', ''),
             "make_instrumental": data.get('make_instrumental', True),
             "wait_audio": True
         }
@@ -65,7 +65,7 @@ def generate_bgm():
             audio_info = response[0]
             return jsonify({
                 "title": audio_info['title'],
-                "artist": "NewGen aka ng",
+                "artist": "Bay Bear",
                 "style": audio_info['tags'],
                 "audio_url": audio_info['audio_url']
             })

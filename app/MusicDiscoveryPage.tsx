@@ -14,9 +14,9 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
   const musicStyles: { [key: string]: string } = {
     "Original": 'Original',
     "Pop": 'Pop',
-    "Rock": 'Rock',
+    "R&B": 'R&B',
     "Jazz": 'Jazz',
-    "Classical": 'Classical',
+    "Country": 'Country',
   };
 
   const [sound, setSound] = useState<Audio.Sound | null>(null);
@@ -56,10 +56,10 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
       try {
         console.log('Fetching song...');
         const payload = {
-          prompt: "Create a calm and soothing background music",
+          prompt: "Being with you makes anywhere feel right. It’s like experiencing Paris in the rain, no matter where we are. We don’t need a fancy town or expensive bottles with names we can’t pronounce. Simply being together, anywhere, feels like Paris in the rain. When I’m with you, everything feels like Paris in the rain.",
           tags: selectedStyle,
-          title: "Calm Melody",
-          artist: "Justin Bieber"
+          title: "Rainy Paris",
+          artist: ""
         };
         console.log('Payload:', payload);
         const res = await axios.post('http://localhost:5003/generate_bgm', payload);
@@ -75,45 +75,6 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
     };
     fetchSong();
   }, [selectedStyle]);
-  
-
-  // // current version
-  // useEffect(() => {
-  //   return sound
-  //     ? () => {
-  //         sound.unloadAsync(); // Unload sound when component unmounts
-  //       }
-  //     : undefined;
-  // }, [sound]);
-  // async function playSound() {
-  //   if (sound) {
-  //     await sound.playAsync();
-  //     setIsPlaying(true);
-  //   } else {
-  //     const { sound: newSound } = await Audio.Sound.createAsync(
-  //       { uri: audioUrl },
-  //       { shouldPlay: true }
-  //     );
-  //     setSound(newSound);
-  //     setIsPlaying(true);
-  //     await newSound.playAsync();
-  //   }
-  // }
-
-  // async function stopSound() {
-  //   if (sound) {
-  //     await sound.stopAsync();
-  //     setIsPlaying(false);
-  //   }
-  // }
-
-  // const handlePress = async () => {
-  //   if (isPlaying) {
-  //     await stopSound();
-  //   } else {
-  //     await playSound();
-  //   }
-  // };
 
   // original before push
   const playSound = async () => {
@@ -280,8 +241,8 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {isLoading && <LoadingOverlay message="Fetching song..." />}
-      {isGenerating && <LoadingOverlay message="Generating and saving BGM..." />}
+      {isLoading && <LoadingOverlay message="Generating..." />}
+      {isGenerating && <LoadingOverlay message="Saving..." />}
     </View>
   );
 };
