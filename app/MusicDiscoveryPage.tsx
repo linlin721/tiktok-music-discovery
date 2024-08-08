@@ -14,9 +14,17 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
   const musicStyles: { [key: string]: string } = {
     "Original": 'Original',
     "Pop": 'Pop',
-    "R&B": 'R&B',
+    "Rock": 'Rock',
     "Jazz": 'Jazz',
-    "Country": 'Country',
+    "R&B": 'R&B',
+  };
+
+  const musicStylesImage: { [key: string]: any } = {
+    Original: require('../assets/original.jpg'),
+    Pop: require('../assets/pop.jpg'),
+    Rock: require('../assets/rock.jpg'),
+    Jazz: require('../assets/jazz.jpg'),
+    'R&B': require('../assets/rnb.jpg'),
   };
 
   const [sound, setSound] = useState<Audio.Sound | null>(null);
@@ -123,7 +131,6 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
         userId,
         musicId
       });
-      Alert.alert('Success', 'BGM added to favorites');
     } catch (error) {
       console.error('Error adding favorite BGM:', error);
       Alert.alert('Error', 'Failed to add BGM to favorites');
@@ -137,7 +144,7 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
       const payload = {
         prompt: "Create a calm and soothing background music",
         tags: selectedStyle,
-        title: "Calm Melody",
+        title: "Song created by Jacob West",
         artist: "any"
       };
 
@@ -148,8 +155,6 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
       const musicId = musicResponse.data._id;
 
       await addFavoriteBGM(musicId);
-
-      Alert.alert('Success', 'BGM generated and saved');
     } catch (error) {
       console.error('Error generating or saving BGM:', error);
       Alert.alert('Error', 'Failed to generate or save BGM');
@@ -182,9 +187,11 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
         </View>
         {songInfo && (
           <View style={styles.songInfo}>
-            <Text style={styles.songTitle}>{songInfo.title}</Text>
+            <View style={styles.songDetails}>
+              <Text style={styles.songTitle}>{songInfo.title}</Text>
+              <Text style={styles.songStyle}>{songInfo.style}</Text>
+            </View>
             <Text style={styles.songArtist}>{songInfo.artist}</Text>
-            <Text style={styles.songStyle}>{songInfo.style}</Text>
           </View>
         )}
       </View>
@@ -213,7 +220,7 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
             onPress={() => setSelectedStyle(style)}
             style={[styles.styleButton, selectedStyle === style && styles.selectedStyleButton]}
           >
-            <Text style={styles.styleButtonText}>{style}</Text>
+            <Image source={musicStylesImage[style]} style={styles.styleButtonImage} />
           </TouchableOpacity>
         ))}
       </View>
@@ -242,7 +249,7 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
       </View>
 
       {isLoading && <LoadingOverlay message="Generating..." />}
-      {isGenerating && <LoadingOverlay message="Saving..." />}
+      {isGenerating && <LoadingOverlay message="Adding to favorites..." />}
     </View>
   );
 };
@@ -257,7 +264,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     paddingVertical: 10,
-    marginTop: 55,
+    marginTop: 60,
   },
   topButton: {
     color: 'white',
@@ -271,8 +278,9 @@ const styles = StyleSheet.create({
   },
   videoContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    //justifyContent: 'center',
+    //alignItems: 'center',
+    marginTop: 60,
   },
   video: {
     width: '100%',
@@ -291,21 +299,35 @@ const styles = StyleSheet.create({
     position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
+    bottom: -145,
+    right: -135,
     opacity: 0, // make the button invisible but still clickable
   },
   songInfo: {
     position: 'absolute',
-    bottom: 20,
+    height: 140,
+    bottom: 0,
+    left: 0,
+    margin: 10,
+    padding: 10,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+  },
+  songDetails: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
   songTitle: {
     color: 'white',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
+    marginRight: 10,
   },
   songArtist: {
     color: 'white',
     fontSize: 16,
+    marginTop: 5,
   },
   songStyle: {
     color: 'white',
@@ -339,21 +361,29 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     marginVertical: 10,
     position: 'absolute',
-    bottom: 60,
+    bottom: 85,
     width: '100%',
   },
   styleButton: {
     backgroundColor: '#1e1e1e',
-    borderRadius: 20,
-    paddingVertical: 5,
-    paddingHorizontal: 15,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   selectedStyleButton: {
-    backgroundColor: '#555',
+    backgroundColor: '#FF1744',
   },
   styleButtonText: {
     color: 'white',
     fontSize: 14,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  styleButtonImage: {
+    width: 50,
+    height: 50,
   },
   bottomNavigation: {
     flexDirection: 'row',
@@ -363,7 +393,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#333',
     position: 'absolute',
-    bottom: 0,
+    bottom: 20,
     width: '100%',
   },
   navItem: {
@@ -385,7 +415,8 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 24,
+    fontWeight: 'bold',
   },
 });
 export default MusicDiscoveryPage;

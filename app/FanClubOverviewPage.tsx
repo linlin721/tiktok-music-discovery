@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
-import { AntDesign, Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, Ionicons, FontAwesome5, MaterialIcons, Feather } from '@expo/vector-icons';
 import { NavigationProp } from '@react-navigation/native';
 
 type Props = {
@@ -40,7 +40,7 @@ const FanClubOverviewPage: React.FC<Props> = ({ navigation }) => {
             <Text style={styles.postStatText}>{item.comments}</Text>
           </View>
           <View style={styles.postStat}>
-            <AntDesign name="like2" size={16} color="gray" />
+            <AntDesign name="hearto" size={16} color="gray" />
             <Text style={styles.postStatText}>{item.likes}</Text>
           </View>
           <View style={styles.postStat}>

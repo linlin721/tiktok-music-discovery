@@ -267,7 +267,7 @@ export default function PostDetailPage({ navigation, route }: { navigation: any,
                                     </View>
                                     {isFirstJacobWComment && (
                                         <TouchableOpacity onPress={handleDeleteComments} style={styles.iconText}>
-                                            <Text style={styles.deleteText}>Delete All</Text>
+                                            <Text style={styles.deleteText}>delete</Text>
                                         </TouchableOpacity>
                                     )}
                                 </View>
@@ -458,8 +458,7 @@ const styles = StyleSheet.create({
         color: 'gray',
     },
     deleteText: {
-        marginLeft: 16,
-        color: 'red',
-        fontWeight: 'bold'
+        marginLeft: 160,
+        color: 'gray',
     },
 });
