@@ -33,6 +33,8 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
       <Text style={styles.loadingText}>{message}</Text>
     </View>
   );
+
+  // fetch the userid 
   useEffect(() => {
     const fetchUserId = async () => {
       try {
@@ -46,6 +48,7 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
     fetchUserId();
   }, []);
 
+  // post to fetch song
   useEffect(() => {
     const fetchSong = async () => {
       setIsLoading(true); // Start loading
@@ -73,74 +76,81 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
     fetchSong();
   }, [selectedStyle]);
   
-  useEffect(() => {
-    return sound
-      ? () => {
-          sound.unloadAsync(); // Unload sound when component unmounts
-        }
-      : undefined;
-  }, [sound]);
-  async function playSound() {
-    if (sound) {
-      await sound.playAsync();
-      setIsPlaying(true);
-    } else {
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: audioUrl },
-        { shouldPlay: true }
-      );
-      setSound(newSound);
-      setIsPlaying(true);
-      await newSound.playAsync();
-    }
-  }
 
-  async function stopSound() {
-    if (sound) {
-      await sound.stopAsync();
-      setIsPlaying(false);
-    }
-  }
-
-  const handlePress = async () => {
-    if (isPlaying) {
-      await stopSound();
-    } else {
-      await playSound();
-    }
-  };
-  // const playSound = async () => {
-  //   try {
-  //     console.log('Loading Sound');
-  //     if (sound) {
-  //       // await sound.unloadAsync();
-  //       console.log('Stopping Sound');
-  //       await sound.stopAsync();
-  //       await sound.unloadAsync();
-  //       setSound(null);
-  //     }
+  // // current version
+  // useEffect(() => {
+  //   return sound
+  //     ? () => {
+  //         sound.unloadAsync(); // Unload sound when component unmounts
+  //       }
+  //     : undefined;
+  // }, [sound]);
+  // async function playSound() {
+  //   if (sound) {
+  //     await sound.playAsync();
+  //     setIsPlaying(true);
+  //   } else {
   //     const { sound: newSound } = await Audio.Sound.createAsync(
   //       { uri: audioUrl },
   //       { shouldPlay: true }
   //     );
   //     setSound(newSound);
-
-  //     console.log('Playing Sound');
+  //     setIsPlaying(true);
   //     await newSound.playAsync();
-  //   } catch (error) {
-  //     console.error('Error handling sound object:', error);
+  //   }
+  // }
+
+  // async function stopSound() {
+  //   if (sound) {
+  //     await sound.stopAsync();
+  //     setIsPlaying(false);
+  //   }
+  // }
+
+  // const handlePress = async () => {
+  //   if (isPlaying) {
+  //     await stopSound();
+  //   } else {
+  //     await playSound();
   //   }
   // };
 
-  // // Cleanup sound object
-  // useEffect(() => {
-  //   return () => {
-  //     if (sound) {
-  //       console.log('Unloading Sound');
-  //       sound.unloadAsync();
-  //     }
-  //   };
-  // }, [sound]);
+  // original before push
+  const playSound = async () => {
+    try {
+      console.log('Loading Sound');
+      if (sound) {
+        console.log('Stopping Sound');
+        await sound.unloadAsync();
+        // console.log('Stopping Sound');
+        // await sound.stopAsync();
+        // await sound.unloadAsync();
+        setSound(null);
+      }
+      else {
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          { uri: audioUrl },
+          { shouldPlay: true }
+        );
+        setSound(newSound);
+
+        console.log('Playing Sound');
+        await newSound.playAsync();
+    }
+    } catch (error) {
+      console.error('Error handling sound object:', error);
+    }
+  };
+
+  // Cleanup sound object
+  useEffect(() => {
+    return () => {
+      if (sound) {
+        console.log('Unloading Sound');
+        sound.unloadAsync();
+      }
+    };
+  }, [sound]);
 
   const addFavoriteBGM = async (musicId: string) => {
     if (!userId) {
@@ -202,9 +212,12 @@ const MusicDiscoveryPage: React.FC<Props> = ({ navigation }) => {
         <Image source={require('../assets/test.gif')} style={styles.video} />
         <View style={styles.centerContent}>
           <Image source={{ uri: 'https://media.tenor.com/9kC8XJtFYdsAAAAC/frkst-records-music-label-art.gif' }} style={styles.centerGif} />
-          <TouchableOpacity onPress={handlePress} style={styles.playButton}>
+          <TouchableOpacity onPress={playSound} style={styles.playButton}>
             <Ionicons name="play-circle-outline" size={64} color="white" />
           </TouchableOpacity>
+          {/* <TouchableOpacity onPress={handlePress} style={styles.playButton}>
+            <Ionicons name={isPlaying ? 'pause-circle-outline' : 'play-circle-outline'} size={64} color="white" />
+          </TouchableOpacity> */}
         </View>
         {songInfo && (
           <View style={styles.songInfo}>
